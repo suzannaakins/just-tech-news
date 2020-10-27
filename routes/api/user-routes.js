@@ -51,6 +51,30 @@ router.post('/', (req, res) => {
         });
 });
 
+//create login route to verify user's identity - /api/users/login
+router.post('/login', (req, res) => {
+    //expects {email: fjsljs@gmail.com, password: ksjilwej}
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    })
+        .then(dbUserData => {
+            if (!dbUserData) {
+                res.status(400).json({ message: "No user with that email address." });
+                return;
+            }
+            //Verify user password
+            const validPassword = dbUserData.checkPassword(req.body.password);
+            if (!validPassword) {
+                res.status(400).json({ message: 'Incorrect password.' });
+            }
+
+            res.json({ user: dbUserData, message: 'You are now logged in.' });
+
+        });
+});
+
 //PUT /api/users/1  --> UPDATES user
 router.put('/:id', (req, res) => {
     //expects username, email, password
