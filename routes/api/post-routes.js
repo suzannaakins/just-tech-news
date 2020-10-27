@@ -2,11 +2,12 @@ const router = require('express').Router();
 const { debugPort } = require('process');
 const { Post, User } = require('../../models');
 
-//retrieve ALL posts in the DB. get all users
+//retrieve ALL posts in the DB. with its user
 router.get('/', (req, res) => {
     console.log('=================');
     Post.findAll({
         attributes: ['id', 'post_url', 'title', 'created_at'],
+        order: [['created_at', 'DESC']],
         include: [
             {
                 model: User,
