@@ -48,4 +48,20 @@ router.get('/:id', (req, res) => {
         });
 });
 
+//create a NEW post
+//POST /api/posts
+router.post('/', (req, res) => {
+    //expects url, title, user_id(who created it)
+    Post.create({
+        title: req.body.title,
+        post_url: req.body.post_url,
+        user_id: req.body.user_id
+    })
+        .then(dbUserData => res.json(dbUserData))
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
+
 module.exports = router;
