@@ -52,11 +52,16 @@ User.init(
 
         //encrypt user password
         hooks: {
-            //set up beforeCreate lifecycle "hook" functionality
+            //set up beforeCreate lifecycle "hook" functionality for NEW user
             async beforeCreate(newUserData) {
                 newUserData.password = await bcrypt.hash(newUserData.password, 10);
                 return newUserData;
             },
+            //set up beforeCreate lifecycle "hook" functionality for UPDATED user
+            async beforeUpdate(updatedUserData) {
+                updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10);
+                return updatedUserData;
+            }
         },
         //pass in our imported seq. connection (dir connect to our database)
         sequelize,
