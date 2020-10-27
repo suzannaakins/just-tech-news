@@ -72,63 +72,41 @@ router.post('/', (req, res) => {
         });
 });
 
-//update when a post gets VOTED on (PUT /api/posts/upvote)
+//VOTE and update when a post gets VOTED on (PUT /api/posts/upvote)
 //must be before the /:id PUT route, otherwise express.js will think "upvote" is a valid parameter for /:id
 router.put('/upvote', (req, res) => {
-    //has TWO queries - 1. use vote model to create vote, 2. query the post to get updated vote count
-    Vote.create({
-        user_id: req.body.user_id,
-        post_id: req.body.post_id
-    })
-        .then(() => {
-            //find the post we just voted on
-            return Post.findOne({
-                where: {
-                    id: req.body.post_id
-                },
-                attributes: [
-                    "id",
-                    'post_url',
-                    'title',
-                    'created_at',
-                    //use raw MySQL aggregate function query to get a count of how many votes the post has + return it under the name 'vote_count'
-                    [
-                        sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
-                        'vote_count'
-                    ]
-                ]
-            })
-                .then(dbPostData => res.json(dbPostData))
-                .catch(err => {
-                    console.log(err);
-                    res.status(400).json(err);
-                });
+    //custom static method from models/Post.js    
+    Post.upvote(req.body, { Vote })
+        .then(updatedPostData => res.json(updatedPostData))
+        .catch(err => {
+            console.log(err);
+            res.status(400).json(err);
         });
+});
 
-    //update a post's TITLE
-    router.put('/:id', (req, res) => {
-        Post.update(
-            {
-                title: req.body.title
-            },
-            {
-                where: {
-                    id: req.params.id
-                }
+//update a post's TITLE
+router.put('/:id', (req, res) => {
+    Post.update(
+        {
+            title: req.body.title
+        },
+        {
+            where: {
+                id: req.params.id
             }
-        )
-            .then(dbPostData => {
-                if (!dbPostData) {
-                    res.status(404).json({ message: 'No post with this id' });
-                    return;
-                }
-                res.json(dbPostData);
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).json(err);
-            });
-    });
+        }
+    )
+        .then(dbPostData => {
+            if (!dbPostData) {
+                res.status(404).json({ message: 'No post with this id' });
+                return;
+            }
+            res.json(dbPostData);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
 });
 
 router.delete('/:id', (req, res) => {
