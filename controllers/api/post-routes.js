@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { debugPort } = require('process');
 const { Post, User, Vote, Comment } = require('../../models');
 const sequelize = require('../../config/connection');
-const withAuth = require('../utils/auth');
+const withAuth = require('../../utils/auth.js');
 
 //retrieve ALL posts in the DB. with its user
 router.get('/', (req, res) => {
